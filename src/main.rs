@@ -8,7 +8,6 @@ mod sample;
 mod services;
 mod startup;
 mod ui;
-mod ui_ext;
 
 const USAGE: &str = "Usage: m3-monitor [--page PAGE]
 

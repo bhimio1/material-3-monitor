@@ -4,9 +4,10 @@
 use crate::app::App;
 use crate::sample::io::NetKind;
 use crate::sample::Snapshot;
-use crate::ui_ext::{self as ext, area_chart, legend, meter, stat_line, tile, Series};
 use egui::{vec2, RichText, Ui};
-use material_3_ui::common;
+use material_3_ui::charts::{self, area_chart, legend, meter, Series};
+use material_3_ui::common::{self, stat_line, tile};
+use material_3_ui::format;
 use material_3_ui::icons::icons::*;
 use material_3_ui::widgets;
 
@@ -14,23 +15,23 @@ const CHART_H: f32 = 96.0;
 
 pub fn show(app: &mut App, ui: &mut Ui) {
     let Some(snap) = app.snap.clone() else {
-        ext::wide_page(ui, ICON_MONITORING, "Overview", "", 1240.0, |ui| common::loading(ui, "Reading the system…"));
+        common::wide_page(ui, ICON_MONITORING, "Overview", "", 1240.0, |ui| common::loading(ui, "Reading the system…"));
         return;
     };
     let palette = widgets::palette(ui);
     let p = &*palette;
     let info = app.sampler.info.clone();
-    let subtitle = format!("{} · {} · up {}", info.hostname, info.os, ext::duration(snap.uptime));
+    let subtitle = format!("{} · {} · up {}", info.hostname, info.os, format::duration(snap.uptime));
     let history = &app.history;
     let len = history.len();
     let gaming = app.gaming.value.clone();
     let show_virtual = app.config.show_virtual_interfaces;
 
-    ext::wide_page(ui, ICON_MONITORING, "Overview", &subtitle, 1240.0, |ui| {
+    common::wide_page(ui, ICON_MONITORING, "Overview", &subtitle, 1240.0, |ui| {
         // CPU spans the full width.
         cpu_tile(ui, &snap, &info, history, len);
 
-        let mut tiles: Vec<ext::TileFn> = Vec::new();
+        let mut tiles: Vec<common::TileFn> = Vec::new();
         let s = &snap;
         tiles.push(Box::new(move |ui: &mut Ui| memory_tile(ui, s, history, len)));
         for gpu in &snap.gpus {
@@ -43,13 +44,13 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                         ui.add_space(6.0);
                     }
                     if let (Some(used), Some(total)) = (gpu.vram_used, gpu.vram_total) {
-                        stat_line(ui, "Video memory", &format!("{} of {}", ext::bytes(used), ext::bytes(total)));
+                        stat_line(ui, "Video memory", &format!("{} of {}", format::bytes(used), format::bytes(total)));
                         meter(ui, used as f32 / total as f32, ui.available_width());
                         ui.add_space(4.0);
                     }
                     if let Some(c) = gpu.clock_mhz {
-                        let max = gpu.max_clock_mhz.map(|m| format!(" (max {})", ext::mhz(m))).unwrap_or_default();
-                        stat_line(ui, "Clock", &format!("{}{max}", ext::mhz(c)));
+                        let max = gpu.max_clock_mhz.map(|m| format!(" (max {})", format::mhz(m))).unwrap_or_default();
+                        stat_line(ui, "Clock", &format!("{}{max}", format::mhz(c)));
                     }
                     if let Some(t) = gpu.temp {
                         stat_line(ui, "Temperature", &format!("{t:.0} °C"));
@@ -77,10 +78,10 @@ pub fn show(app: &mut App, ui: &mut Ui) {
         for disk in disks {
             tiles.push(Box::new(move |ui: &mut Ui| {
                 let title = disk.model.clone().map(|m| format!("{m} ({})", disk.name)).unwrap_or_else(|| disk.name.clone());
-                tile(ui, ICON_HARD_DRIVE, &title, &ext::percent(disk.busy), |ui| {
+                tile(ui, ICON_HARD_DRIVE, &title, &format::percent(disk.busy), |ui| {
                     let r = history.values(&format!("disk:{}:r", disk.name));
                     let w = history.values(&format!("disk:{}:w", disk.name));
-                    let max = ext::nice_max(history.max(&format!("disk:{}:r", disk.name)).max(history.max(&format!("disk:{}:w", disk.name))).max(1e6));
+                    let max = charts::nice_max(history.max(&format!("disk:{}:r", disk.name)).max(history.max(&format!("disk:{}:w", disk.name))).max(1e6));
                     area_chart(
                         ui,
                         vec2(ui.available_width(), CHART_H),
@@ -89,9 +90,9 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                         len,
                     );
                     ui.horizontal(|ui| {
-                        legend(ui, p.primary, &format!("Read {}", ext::rate(disk.read_rate)));
+                        legend(ui, p.primary, &format!("Read {}", format::rate(disk.read_rate)));
                         ui.add_space(8.0);
-                        legend(ui, p.tertiary, &format!("Write {}", ext::rate(disk.write_rate)));
+                        legend(ui, p.tertiary, &format!("Write {}", format::rate(disk.write_rate)));
                     });
                 });
             }));
@@ -109,10 +110,10 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                     NetKind::Wired => ICON_LAN,
                     NetKind::Virtual => ICON_DEVICE_HUB,
                 };
-                tile(ui, icon, &net.name, &ext::rate(net.rx_rate + net.tx_rate), |ui| {
+                tile(ui, icon, &net.name, &format::rate(net.rx_rate + net.tx_rate), |ui| {
                     let rx = history.values(&format!("net:{}:rx", net.name));
                     let tx = history.values(&format!("net:{}:tx", net.name));
-                    let max = ext::nice_max(history.max(&format!("net:{}:rx", net.name)).max(history.max(&format!("net:{}:tx", net.name))).max(1e5));
+                    let max = charts::nice_max(history.max(&format!("net:{}:rx", net.name)).max(history.max(&format!("net:{}:tx", net.name))).max(1e5));
                     area_chart(
                         ui,
                         vec2(ui.available_width(), CHART_H),
@@ -121,11 +122,11 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                         len,
                     );
                     ui.horizontal(|ui| {
-                        legend(ui, p.primary, &format!("Down {}", ext::rate(net.rx_rate)));
+                        legend(ui, p.primary, &format!("Down {}", format::rate(net.rx_rate)));
                         ui.add_space(8.0);
-                        legend(ui, p.tertiary, &format!("Up {}", ext::rate(net.tx_rate)));
+                        legend(ui, p.tertiary, &format!("Up {}", format::rate(net.tx_rate)));
                     });
-                    stat_line(ui, "Since boot", &format!("↓ {}  ↑ {}", ext::bytes(net.rx_total), ext::bytes(net.tx_total)));
+                    stat_line(ui, "Since boot", &format!("↓ {}  ↑ {}", format::bytes(net.rx_total), format::bytes(net.tx_total)));
                 });
             }));
         }
@@ -133,10 +134,10 @@ pub fn show(app: &mut App, ui: &mut Ui) {
             tiles.push(Box::new(move |ui: &mut Ui| {
                 let used: u64 = s.mounts.iter().map(|m| m.total - m.available).sum();
                 let total: u64 = s.mounts.iter().map(|m| m.total).sum();
-                tile(ui, ICON_STORAGE, "Storage", &ext::percent(used as f32 / total.max(1) as f32), |ui| {
+                tile(ui, ICON_STORAGE, "Storage", &format::percent(used as f32 / total.max(1) as f32), |ui| {
                     for m in &s.mounts {
                         let used = m.total.saturating_sub(m.available);
-                        stat_line(ui, &format!("{} ({})", m.mount_point, m.fs), &format!("{} free of {}", ext::bytes(m.available), ext::bytes(m.total)));
+                        stat_line(ui, &format!("{} ({})", m.mount_point, m.fs), &format!("{} free of {}", format::bytes(m.available), format::bytes(m.total)));
                         meter(ui, used as f32 / m.total.max(1) as f32, ui.available_width());
                         ui.add_space(6.0);
                     }
@@ -161,13 +162,13 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                     stat_line(ui, "Status", &status);
                     if let Some(h) = bat.hours_left {
                         let what = if bat.status == "Charging" { "Until full" } else { "Remaining" };
-                        stat_line(ui, what, &ext::duration(h as f64 * 3600.0));
+                        stat_line(ui, what, &format::duration(h as f64 * 3600.0));
                     }
                     if let Some(w) = bat.power {
                         stat_line(ui, "Power", &format!("{w:.1} W"));
                     }
                     if let Some(h) = bat.health {
-                        stat_line(ui, "Health", &ext::percent(h));
+                        stat_line(ui, "Health", &format::percent(h));
                     }
                     if let Some(c) = bat.cycles {
                         stat_line(ui, "Cycles", &c.to_string());
@@ -181,7 +182,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
         tiles.push(Box::new(move |ui: &mut Ui| {
             tile(ui, ICON_COMPUTER, "System", "", |ui| {
                 stat_line(ui, "Kernel", &info.kernel);
-                stat_line(ui, "Uptime", &ext::duration(s.uptime));
+                stat_line(ui, "Uptime", &format::duration(s.uptime));
                 stat_line(ui, "Load average", &format!("{:.2}  {:.2}  {:.2}", s.load.one, s.load.five, s.load.fifteen));
                 stat_line(ui, "Tasks", &s.load.tasks.to_string());
                 stat_line(ui, "Context switches", &format!("{:.0}/s", s.context_switch_rate));
@@ -193,24 +194,24 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                 );
             });
         }));
-        ext::tile_grid(ui, 380.0, tiles);
+        common::tile_grid(ui, 380.0, tiles);
     });
 }
 
 fn cpu_tile(ui: &mut Ui, snap: &Snapshot, info: &crate::sample::StaticInfo, history: &crate::sample::history::History, len: usize) {
     let p = widgets::palette(ui);
     let title = format!("{} · {} threads", info.cpu_model, info.cores);
-    tile(ui, ICON_MEMORY, &title, &ext::percent(snap.cpu), |ui| {
+    tile(ui, ICON_MEMORY, &title, &format::percent(snap.cpu), |ui| {
         let v = history.values("cpu");
         area_chart(ui, vec2(ui.available_width(), 130.0), &[Series { values: &v, color: p.primary }], 100.0, len);
         ui.add_space(8.0);
-        ext::bars(ui, &snap.cores, 40.0).on_hover_text(
+        charts::bars(ui, &snap.cores, 40.0).on_hover_text(
             snap.cores
                 .iter()
                 .enumerate()
                 .map(|(i, c)| {
-                    let f = snap.freqs.get(i).filter(|f| **f > 0.0).map(|f| format!(" · {}", ext::mhz(*f))).unwrap_or_default();
-                    format!("CPU {i}: {}{f}", ext::percent(*c))
+                    let f = snap.freqs.get(i).filter(|f| **f > 0.0).map(|f| format!(" · {}", format::mhz(*f))).unwrap_or_default();
+                    format!("CPU {i}: {}{f}", format::percent(*c))
                 })
                 .collect::<Vec<_>>()
                 .join("\n"),
@@ -226,10 +227,10 @@ fn cpu_tile(ui: &mut Ui, snap: &Snapshot, info: &crate::sample::StaticInfo, hist
             if !active.is_empty() {
                 let avg = active.iter().sum::<f32>() / active.len() as f32;
                 let top = active.iter().copied().fold(0.0, f32::max);
-                chip("Frequency", format!("{} avg · {} top", ext::mhz(avg), ext::mhz(top)));
+                chip("Frequency", format!("{} avg · {} top", format::mhz(avg), format::mhz(top)));
             }
             if let Some(max) = info.max_freq {
-                chip("Max", ext::mhz(max));
+                chip("Max", format::mhz(max));
             }
             if let Some(t) = snap.cpu_temp {
                 chip("Temperature", format!("{t:.0} °C"));
@@ -246,7 +247,7 @@ fn memory_tile(ui: &mut Ui, snap: &Snapshot, history: &crate::sample::history::H
     let p = widgets::palette(ui);
     let m = &snap.mem;
     let frac = if m.total > 0 { m.used() as f32 / m.total as f32 } else { 0.0 };
-    tile(ui, ICON_DEVELOPER_BOARD, "Memory", &ext::percent(frac), |ui| {
+    tile(ui, ICON_DEVELOPER_BOARD, "Memory", &format::percent(frac), |ui| {
         let v = history.values("mem");
         let swap = history.values("swap");
         let mut series = vec![Series { values: &v, color: p.tertiary }];
@@ -255,19 +256,19 @@ fn memory_tile(ui: &mut Ui, snap: &Snapshot, history: &crate::sample::history::H
         }
         area_chart(ui, vec2(ui.available_width(), CHART_H), &series, 100.0, len);
         ui.horizontal(|ui| {
-            legend(ui, p.tertiary, &format!("Used {} of {}", ext::bytes(m.used()), ext::bytes(m.total)));
+            legend(ui, p.tertiary, &format!("Used {} of {}", format::bytes(m.used()), format::bytes(m.total)));
             if m.swap_total > 0 {
                 ui.add_space(8.0);
-                legend(ui, p.secondary, &format!("Swap {} of {}", ext::bytes(m.swap_used()), ext::bytes(m.swap_total)));
+                legend(ui, p.secondary, &format!("Swap {} of {}", format::bytes(m.swap_used()), format::bytes(m.swap_total)));
             }
         });
-        stat_line(ui, "Cached", &ext::bytes(m.cached + m.buffers));
-        stat_line(ui, "Shared", &ext::bytes(m.shared));
+        stat_line(ui, "Cached", &format::bytes(m.cached + m.buffers));
+        stat_line(ui, "Shared", &format::bytes(m.shared));
         for z in &snap.zram {
             stat_line(
                 ui,
                 &format!("{} ({})", z.name, z.algorithm),
-                &format!("{} in {} · {:.1}×", ext::bytes(z.original), ext::bytes(z.memory_used), z.ratio()),
+                &format!("{} in {} · {:.1}×", format::bytes(z.original), format::bytes(z.memory_used), z.ratio()),
             );
         }
     });

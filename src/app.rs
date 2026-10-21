@@ -7,6 +7,9 @@ use crate::sample::{Roots, Sampler, Snapshot};
 use crate::services::{Scope, Unit};
 use crate::startup::{AutostartEntry, HyprExec};
 use crate::ui;
+use material_3_ui::charts;
+use material_3_ui::common;
+use material_3_ui::format;
 use material_3_ui::icons::icons::*;
 use material_3_ui::icons::MaterialIcon;
 use material_3_ui::sys::task::Task;
@@ -249,8 +252,8 @@ impl App {
         ui.add_space(14.0);
         let counts = self.snap.as_ref().map(|s| {
             (
-                ui_ext_percent(s.cpu),
-                if s.mem.total > 0 { ui_ext_percent(s.mem.used() as f32 / s.mem.total as f32) } else { String::new() },
+                format::percent(s.cpu),
+                if s.mem.total > 0 { format::percent(s.mem.used() as f32 / s.mem.total as f32) } else { String::new() },
             )
         });
         for page in Page::ALL {
@@ -280,14 +283,9 @@ impl App {
             let len = self.history.len();
             let w = ui.available_width();
             for (key, label, value, color) in [("cpu", "CPU", cpu, p.primary), ("mem", "Memory", mem, p.tertiary)] {
-                ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new(label).size(12.5).color(p.on_surface_variant));
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(egui::RichText::new(value).size(12.5).color(p.on_surface));
-                    });
-                });
+                common::stat_line(ui, label, value);
                 let values = self.history.values(key);
-                crate::ui_ext::area_chart(ui, egui::vec2(w, 40.0), &[crate::ui_ext::Series { values: &values, color }], 100.0, len);
+                charts::area_chart(ui, egui::vec2(w, 40.0), &[charts::Series { values: &values, color }], 100.0, len);
                 ui.add_space(6.0);
             }
         }
@@ -300,10 +298,6 @@ impl App {
             }
         });
     }
-}
-
-fn ui_ext_percent(f: f32) -> String {
-    crate::ui_ext::percent(f)
 }
 
 impl eframe::App for App {
