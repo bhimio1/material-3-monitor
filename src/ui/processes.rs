@@ -4,9 +4,9 @@
 use crate::app::{App, ConfirmEnd, Refresh};
 use crate::config::ProcessView;
 use crate::sample::procs::{self, AppGroup, ProcRow, Signal, SortKey};
-use crate::ui_ext as ext;
 use egui::{pos2, vec2, Align2, CornerRadius, FontId, Rect, RichText, Sense, Ui};
 use material_3_ui::common;
+use material_3_ui::format;
 use material_3_ui::icons::icons::*;
 use material_3_ui::icons::MaterialIcon;
 use material_3_ui::widgets::{self, ButtonKind};
@@ -156,7 +156,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
         rows.len(),
         groups.len(),
         total_cpu,
-        ext::bytes(app.snap.as_ref().map(|s| s.mem.used()).unwrap_or(0))
+        format::bytes(app.snap.as_ref().map(|s| s.mem.used()).unwrap_or(0))
     );
 
     let mut toggle_expand: Option<u32> = None;
@@ -319,8 +319,8 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                         pid_s,
                         user,
                         format!("{cpu:.1}%"),
-                        ext::bytes(mem),
-                        if io > 0.0 { ext::rate(io) } else { "—".into() },
+                        format::bytes(mem),
+                        if io > 0.0 { format::rate(io) } else { "—".into() },
                         state,
                     ];
                     let mut x = rect.left() + name_w;
@@ -567,7 +567,7 @@ pub fn dialogs(app: &mut App, ctx: &egui::Context) {
                     let extra = procs::stat_extra(pid).unwrap_or_default();
                     let cwd = std::fs::read_link(format!("/proc/{pid}/cwd")).map(|c| c.display().to_string()).unwrap_or_else(|_| "—".into());
                     let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
-                    let started = if r.start_time > 0 { format!("{} ago", ext::duration(now.saturating_sub(r.start_time) as f64)) } else { "—".into() };
+                    let started = if r.start_time > 0 { format!("{} ago", format::duration(now.saturating_sub(r.start_time) as f64)) } else { "—".into() };
                     common::facts(
                         ui,
                         "proc-facts",
@@ -578,8 +578,8 @@ pub fn dialogs(app: &mut App, ctx: &egui::Context) {
                             ("State", r.state.label().into()),
                             ("Started", started),
                             ("CPU", format!("{:.1}%", r.cpu)),
-                            ("Memory", ext::bytes(r.memory)),
-                            ("Disk", format!("read {} · write {}", ext::rate(r.read_rate), ext::rate(r.write_rate))),
+                            ("Memory", format::bytes(r.memory)),
+                            ("Disk", format!("read {} · write {}", format::rate(r.read_rate), format::rate(r.write_rate))),
                             ("Priority (nice)", extra.nice.to_string()),
                             ("Threads", extra.threads.to_string()),
                             ("Executable", r.exe.as_ref().map(|e| e.display().to_string()).unwrap_or_else(|| "—".into())),

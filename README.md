@@ -105,7 +105,6 @@ src/
   startup.rs    XDG autostart, Hyprland startup commands
   gaming.rs     m3-games status, scxctl, power profile, GameMode
   ui/           one module per page
-  ui_ext.rs     charts, meters and tiles (candidates for material-3-ui)
 tests/fixtures/ a fake /sys (sensors, GPUs, battery, zram), nvidia-smi output,
                 systemd and autostart data, used by tests and screenshots
 ```
