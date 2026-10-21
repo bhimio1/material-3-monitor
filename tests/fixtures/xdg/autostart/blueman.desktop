@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Bluetooth
+Comment=Bluetooth tray
+Exec=blueman-applet

@@ -1,0 +1,16 @@
+[
+ {"unit_file":"/usr/lib/systemd/user/at-spi-dbus-bus.service","state":"static","preset":null},
+ {"unit_file":"/usr/lib/systemd/user/dbus-broker.service","state":"enabled","preset":"enabled"},
+ {"unit_file":"/usr/lib/systemd/user/easyeffects.service","state":"enabled","preset":"disabled"},
+ {"unit_file":"/usr/lib/systemd/user/gnome-keyring-daemon.service","state":"enabled","preset":"enabled"},
+ {"unit_file":"/usr/lib/systemd/user/hypridle.service","state":"enabled","preset":"disabled"},
+ {"unit_file":"/usr/lib/systemd/user/hyprpolkitagent.service","state":"enabled","preset":"disabled"},
+ {"unit_file":"/usr/lib/systemd/user/pipewire-pulse.service","state":"enabled","preset":"enabled"},
+ {"unit_file":"/usr/lib/systemd/user/pipewire.service","state":"enabled","preset":"enabled"},
+ {"unit_file":"/usr/lib/systemd/user/syncthing.service","state":"disabled","preset":"enabled"},
+ {"unit_file":"/usr/lib/systemd/user/wireplumber.service","state":"enabled","preset":"enabled"},
+ {"unit_file":"/usr/lib/systemd/user/xdg-desktop-portal-hyprland.service","state":"static","preset":null},
+ {"unit_file":"/usr/lib/systemd/user/xdg-desktop-portal.service","state":"static","preset":null},
+ {"unit_file":"/usr/lib/systemd/user/xdg-document-portal.service","state":"static","preset":null},
+ {"unit_file":"/usr/lib/systemd/user/ssh-agent.service","state":"disabled","preset":"disabled"}
+]

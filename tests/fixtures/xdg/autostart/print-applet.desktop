@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Print queue applet
+Exec=system-config-printer-applet

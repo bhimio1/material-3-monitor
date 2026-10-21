@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Network
+Comment=Manage your network connections
+Exec=nm-applet --indicator

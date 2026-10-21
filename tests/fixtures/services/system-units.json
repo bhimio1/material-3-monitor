@@ -1,0 +1,15 @@
+[
+ {"unit":"at-spi-dbus-bus.service","load":"loaded","active":"active","sub":"running","description":"Accessibility services bus"},
+ {"unit":"dbus-broker.service","load":"loaded","active":"active","sub":"running","description":"D-Bus User Message Bus"},
+ {"unit":"easyeffects.service","load":"loaded","active":"failed","sub":"failed","description":"EasyEffects audio processing"},
+ {"unit":"gnome-keyring-daemon.service","load":"loaded","active":"active","sub":"running","description":"GNOME Keyring daemon"},
+ {"unit":"hypridle.service","load":"loaded","active":"active","sub":"running","description":"Hyprland's idle daemon"},
+ {"unit":"hyprpolkitagent.service","load":"loaded","active":"active","sub":"running","description":"Hyprland Polkit Authentication Agent"},
+ {"unit":"pipewire-pulse.service","load":"loaded","active":"active","sub":"running","description":"PipeWire PulseAudio"},
+ {"unit":"pipewire.service","load":"loaded","active":"active","sub":"running","description":"PipeWire Multimedia Service"},
+ {"unit":"syncthing.service","load":"loaded","active":"inactive","sub":"dead","description":"Syncthing - Open Source Continuous File Synchronization"},
+ {"unit":"wireplumber.service","load":"loaded","active":"active","sub":"running","description":"Multimedia Service Session Manager"},
+ {"unit":"xdg-desktop-portal-hyprland.service","load":"loaded","active":"active","sub":"running","description":"Portal service (Hyprland implementation)"},
+ {"unit":"xdg-desktop-portal.service","load":"loaded","active":"active","sub":"running","description":"Portal service"},
+ {"unit":"xdg-document-portal.service","load":"loaded","active":"active","sub":"running","description":"flatpak document portal service"}
+]
