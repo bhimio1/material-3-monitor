@@ -1,0 +1,32 @@
+# Maintainer: bhimio1
+# Template: the release workflow fills in @PKGVER@ and @SHA256@ and publishes
+# this to the AUR as material-3-monitor-bin.
+pkgname=material-3-monitor-bin
+pkgver=@PKGVER@
+pkgrel=1
+pkgdesc="Material 3 system monitor: live charts, processes, services and startup apps"
+arch=('x86_64')
+url="https://github.com/bhimio1/material-3-monitor"
+license=('MIT')
+depends=('libxkbcommon' 'wayland' 'libglvnd' 'systemd' 'polkit')
+optdepends=(
+  'nvidia-utils: NVIDIA GPU usage (nvidia-smi)'
+  'power-profiles-daemon: power profile on the Overview'
+  'scx-scheds: sched-ext scheduler on the Overview (scxctl)'
+  'gamemode: GameMode state on the Overview'
+  'material-3-games: Game Mode and the running game on the Overview'
+  'material-3-file-manager: open a process'\''s file location'
+  'xdg-utils: open files and folders without the Material 3 apps'
+)
+provides=('material-3-monitor')
+conflicts=('material-3-monitor' 'material-3-monitor-git')
+source=("$pkgname-$pkgver.tar.gz::$url/releases/download/v$pkgver/m3-monitor-x86_64-linux.tar.gz")
+sha256sums=('@SHA256@')
+
+package() {
+  cd "m3-monitor-x86_64-linux"
+  install -Dm755 m3-monitor "$pkgdir/usr/bin/m3-monitor"
+  install -Dm644 material_3_monitor.desktop "$pkgdir/usr/share/applications/material_3_monitor.desktop"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 LICENSE-Inter.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE-Inter.txt"
+}

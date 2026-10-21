@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Name=Monitor
+GenericName=System Monitor
+Comment=CPU, memory, GPU, disk and network usage, processes, services and startup apps
+Exec=m3-monitor
+Icon=utilities-system-monitor
+Terminal=false
+Categories=System;Monitor;
+Keywords=task manager;processes;cpu;gpu;memory;performance;services;startup;kill;
+StartupWMClass=material_3_monitor
+Actions=Processes;Services;
+
+[Desktop Action Processes]
+Name=Processes
+Exec=m3-monitor --page processes
+
+[Desktop Action Services]
+Name=Services
+Exec=m3-monitor --page services

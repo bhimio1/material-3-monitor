@@ -1,0 +1,55 @@
+# Maintainer: bhimio1
+pkgname=material-3-monitor-git
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Material 3 system monitor: live charts, processes, services and startup apps"
+arch=('x86_64' 'aarch64')
+url="https://github.com/bhimio1/material-3-monitor"
+license=('MIT')
+depends=('libxkbcommon' 'wayland' 'libglvnd' 'systemd' 'polkit')
+optdepends=(
+  'nvidia-utils: NVIDIA GPU usage (nvidia-smi)'
+  'power-profiles-daemon: power profile on the Overview'
+  'scx-scheds: sched-ext scheduler on the Overview (scxctl)'
+  'gamemode: GameMode state on the Overview'
+  'material-3-games: Game Mode and the running game on the Overview'
+  'material-3-file-manager: open a process'\''s file location'
+  'xdg-utils: open files and folders without the Material 3 apps'
+)
+makedepends=('cargo' 'git')
+provides=('material-3-monitor')
+conflicts=('material-3-monitor' 'material-3-monitor-bin')
+source=("$pkgname::git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$pkgname"
+  printf "0.1.0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "$pkgname"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "$pkgname"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --frozen --release
+}
+
+check() {
+  cd "$pkgname"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --frozen
+}
+
+package() {
+  cd "$pkgname"
+  install -Dm755 target/release/m3-monitor "$pkgdir/usr/bin/m3-monitor"
+  install -Dm644 packaging/material_3_monitor.desktop "$pkgdir/usr/share/applications/material_3_monitor.desktop"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 assets/LICENSE-Inter.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE-Inter.txt"
+}
